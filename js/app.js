@@ -17,6 +17,11 @@ class Presupuesto{
         this.restante = Number(presupuesto);
         this.gasto = [];
     }
+
+    nuevoGasto ( gasto ){
+        this.gasto = [...this.gasto, gasto]
+        console.log(this.gasto)
+    }
 }
 
 class UI{
@@ -51,6 +56,39 @@ class UI{
             divMensaje.remove();
         }, 3000);
     }
+
+    agregarGastoListado(gastos){
+        
+        this.limpiarHTML(); //Elimina el HTML previo
+        
+        //Iterar sobre los gastos
+        gasto.forEach( gasto => {
+            const { cantidad, nombre, id } = gasto;
+
+            //Crear un LI
+            const nuevoGasto = document.createElement('li');
+            nuevoGasto.className = 'list-group-item d-flex justify-content-between align-items-center';
+            nuevoGasto.dataset.id = id;
+
+            //Agrgar el HTML
+            nuevoGasto.innerHTML = `${nombre} <span class="badge badge-primary badge-pill"> ${cantidad} </span>`;
+
+            //Borrar el gasto
+            const btnBorrar = document.createElement('button');
+            btnBorrar.classList.add('btn', 'btn-danger', 'borrar-gasto');
+            btnBorrar.innerHTML = 'Borrar &times;';
+            nuevoGasto.appendChild(btnBorrar);
+
+            //Agregar al HTML
+            gastoListado.appendChild(nuevoGasto);
+        });
+    }
+
+    limpiarHTML(){
+        while(gastoListado.firstChild){
+            gastoListado.removeChild(gastoListado.firstChild);
+        }
+    }
 }
 
 
@@ -71,7 +109,7 @@ function preguntarPresupuesto(){
 
     //Presupuesto valido
     presupuesto = new Presupuesto(presupuestoUsuario);
-    console.log(presupuesto);
+    // console.log(presupuesto);
 
     ui.insertarPresupuesto(presupuesto);
 }
@@ -82,7 +120,7 @@ function agregarGasto(e){
 
     //Leer los datos del formulario
     const nombre = document.querySelector('#gasto').value;
-    const cantidad = document.querySelector('#cantidad').value;
+    const cantidad = Number(document.querySelector('#cantidad').value);
 
     //Validar
     if(nombre === '' || cantidad === ''){
@@ -92,4 +130,19 @@ function agregarGasto(e){
         ui.imprimirAlerta('Cantidad no valida', 'error');
         return;
     }
+
+    //Generrar un objeto con el gasto
+    const gasto = { nombre, cantidad, id: Date.now() };
+
+    //Añade un nuevo gasto
+    presupuesto.nuevoGasto(gasto);
+
+    ui.imprimirAlerta('Gasto agregado Correctamente');
+
+    //Imprimir los gastos
+    const { gastos } = presupuesto
+    ui.agregarGastoListado( gastos )
+
+    //Reiniciar el Formulario
+    formulario.reset();
 }
